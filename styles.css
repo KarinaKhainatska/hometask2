@@ -465,7 +465,7 @@ footer p {
   transform: scale(1.05);
 }
 
-/* Додаємо уніфіковані класи до HTML */
+
 .VWCD25-main,
 .Macos-sequoia-main,
 .iPhone16e-main,
@@ -607,32 +607,6 @@ footer p {
   transform: scale(1.05);
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 .Macos-sequoia-main{
     background-color: #ffffff !important;
 }
@@ -669,7 +643,7 @@ footer p {
 }
 
 .MainNews > div, .Offers > div {
-  position: relative;           /* Додали для позиціонування кнопки */
+  position: relative;           
   flex: 0 0 300px;              
   aspect-ratio: 16 / 9;       
   background: white;
