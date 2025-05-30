@@ -1,0 +1,27 @@
+
+[class$="-container"] {
+    .btn-product {
+        position: absolute;
+        top: 80%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background-color: $white;
+        color: $black;
+        font-size: 12px;
+        padding: 4px 8px;
+        width: 80px;
+        max-width: 100px;
+        white-space: nowrap;
+        border: none;
+        cursor: pointer;
+        border-radius: 12px;
+        font-weight: 600;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+
+        &:hover {
+            background-color: #dbdbdb;
+            transform: translate(-50%, -50%) scale(1.05);
+        }
+    }
+}
