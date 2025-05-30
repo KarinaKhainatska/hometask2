@@ -74,6 +74,18 @@ nav#navbar::-webkit-scrollbar {
   }
 }
 
+@media (max-width: 1800px) {
+
+  #navbar a:not(#apple-link):not([href="#search"]):not([href="register.html"]) {
+    display: none;
+  }
+
+  #apple-link,
+  #navbar a[href="#search"]
+  {
+    display: inline-flex;
+  }
+}
 
 #navbar a:hover {
   color: white;
@@ -756,4 +768,66 @@ footer p {
   font-size: 16px;
   padding: 4px 0;
   color: #464545;
+}
+
+
+
+
+@media (max-width: 600px) {
+ 
+  .iPhone16Pro-container,
+  .iPhone16-container,
+  .AppleWatch-Ultra-2-container {
+    max-width: 100%;
+    padding: 0 5px;
+  }
+
+  .container-Main1 {
+    grid-template-columns: 1fr;
+    gap: 10px;
+    padding: 10px 0 0 0;
+    width: 100vw;
+  }
+
+  .container-Main1 > div {
+    aspect-ratio: unset;
+    min-height: 180px;
+  }
+
+  .MainNews, .Offers {
+    gap: 8px;
+    padding: 8px 0 0 0;
+  }
+
+  .MainNews > div, .Offers > div {
+    flex: 0 0 90vw;
+    min-width: 200px;
+    aspect-ratio: unset;
+    min-height: 120px;
+  }
+
+  .Main2, .Main3, .Shop-more {
+    padding: 20px 0;
+  }
+
+  .Overview, .Selection {
+    width: 98%;
+    max-width: 100%;
+    margin: 0 auto;
+  }
+
+  .Selection {
+    grid-template-columns: 1fr;
+    column-gap: 0;
+    row-gap: 10px;
+  }
+
+  .Selection a {
+    font-size: 15px;
+    padding: 2px 0;
+  }
+
+  .Buy p {
+    font-size: 14px;
+  }
 }
