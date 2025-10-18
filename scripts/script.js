@@ -41,7 +41,7 @@ imgarrayURL.appendChild(img);
 });
 //imgarrayURL.appendChild(images);
 },5000);
-*/
+
 let oldString=new Set();
 document.getElementById("check").onclick=function(){
     let input=document.getElementById("inputText").value.trim();
@@ -65,4 +65,25 @@ if  (oldString.size>0){
 }
 oldString=inputSutring;
 document.getElementById("inputText").value="";
-};
+};*/
+const btn = document.getElementById('button');
+    const img = document.getElementById('image');
+    const infoDiv = document.getElementById('info');
+    const apiUrl = "https://anapioficeandfire.com/api/characters/581"; 
+    const getCharacter = async () => {
+      try {
+        const response = await fetch(apiUrl);
+        const data = await response.json();
+        infoDiv.innerHTML = `
+          <h2>${data.name}</h2>
+          <p><strong>Gender:</strong> ${data.gender}</p>
+          <p><strong>Culture:</strong> ${data.culture || '—'}</p>
+        `;
+        img.src = "https://upload.wikimedia.org/wikipedia/en/3/30/Jon_Snow_Season_8.png";
+      } catch (error) {
+        console.error("Error fetching character:", error);
+        infoDiv.textContent = "Failed to load character data.";
+      }
+    };
+
+    btn.addEventListener('click', getCharacter);
