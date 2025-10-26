@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Car Game with Coins</title>
+  <style>
+    body {
+      padding: 0;
+      margin: 0;
+      display: grid;
+      height: 100vh;
+    }
+    canvas {
+      border: 1px solid #d3d3d3;
+      background-color: #f1f1f1;
+    }
+  </style>
+</head>
+<body>
+<script>
+  let myCar;
+  let obstacles = [];
+  let coins = [];
+  let score = 0;
+
+  const myGameArea = {
+    canvas: document.createElement("canvas"),
+    start: function () {
+      this.canvas.width = 480;
+      this.canvas.height = 270;
+      this.context = this.canvas.getContext("2d");
+      document.body.insertBefore(this.canvas, document.body.firstChild);
+    },
+    clear: function () {
+      this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    },
+    update: function () {
+      this.clear();
+      drawScore();
+      obstacles.forEach(ob => ob.draw());
+      coins.forEach(c => c.draw());
+      myCar.update();
+    }
+  };
+
+  class Car {
+    constructor(width, height, color, x, y) {
+      this.width = width;
+      this.height = height;
+      this.color = color;
+      this.x = x;
+      this.y = y;
+      this.speed = 0;
+      this.angle = 0;
+      this.maxSpeed = 3;
+      this.acceleration = 0.1;
+      this.friction = 0.05;
+    }
+
+    update() {
+      const ctx = myGameArea.context;
+
+      this.speed *= (1 - this.friction);
+      if (this.speed > this.maxSpeed) this.speed = this.maxSpeed;
+      if (this.speed < -this.maxSpeed) this.speed = -this.maxSpeed;
+
+      this.x += Math.cos(this.angle) * this.speed;
+      this.y += Math.sin(this.angle) * this.speed;
+
+      if (this.x < 0) this.x = 0;
+      if (this.x > myGameArea.canvas.width - this.width) this.x = myGameArea.canvas.width - this.width;
+      if (this.y < 0) this.y = 0;
+      if (this.y > myGameArea.canvas.height - this.height) this.y = myGameArea.canvas.height - this.height;
+
+      // Перевірка зіткнень з перешкодами
+      for (let ob of obstacles) {
+        if (isColliding(this, ob)) {
+          this.speed = -this.speed * 0.5;
+        }
+      }
+
+      // Перевірка зіткнень з монетками
+      for (let i = coins.length - 1; i >= 0; i--) {
+        if (isColliding(this, coins[i])) {
+          coins.splice(i, 1);
+          score++;
+        }
+      }
+
+      ctx.save();
+      ctx.translate(this.x + this.width / 2, this.y + this.height / 2);
+      ctx.rotate(this.angle);
+
+      ctx.fillStyle = this.color;
+      ctx.fillRect(-this.width / 2, -this.height / 2, this.width, this.height);
+
+      ctx.fillStyle = "#87CEEB";
+      ctx.fillRect(-this.width / 2 + 5, -this.height / 2 + 3, this.width - 10, this.height - 6);
+
+      ctx.fillStyle = "#333";
+      ctx.fillRect(-this.width / 2 - 2, -this.height / 2 - 2, 4, 4);
+      ctx.fillRect(this.width / 2 - 2, -this.height / 2 - 2, 4, 4);
+      ctx.fillRect(-this.width / 2 - 2, this.height / 2 - 2, 4, 4);
+      ctx.fillRect(this.width / 2 - 2, this.height / 2 - 2, 4, 4);
+
+      ctx.restore();
+    }
+
+    accelerate() { this.speed += this.acceleration; }
+    brake() { this.speed -= this.acceleration; }
+    turnLeft() { this.angle -= 0.1; }
+    turnRight() { this.angle += 0.1; }
+    honk() {
+      try {
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        const oscillator = audioContext.createOscillator();
+        const gainNode = audioContext.createGain();
+        oscillator.connect(gainNode);
+        gainNode.connect(audioContext.destination);
+        oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
+        oscillator.frequency.setValueAtTime(600, audioContext.currentTime + 0.1);
+        oscillator.frequency.setValueAtTime(400, audioContext.currentTime + 0.2);
+        gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+        oscillator.type = 'sawtooth';
+        oscillator.start(audioContext.currentTime);
+        oscillator.stop(audioContext.currentTime + 0.3);
+      } catch (error) {
+        console.log('Не вдалося відтворити звук клаксона:', error);
+      }
+    }
+  }
+
+  class Obstacle {
+    constructor(x, y, width, height) {
+      this.x = x;
+      this.y = y;
+      this.width = width;
+      this.height = height;
+    }
+    draw() {
+      const ctx = myGameArea.context;
+      ctx.fillStyle = "black";
+      ctx.fillRect(this.x, this.y, this.width, this.height);
+    }
+  }
+
+  class Coin {
+    constructor(x, y, radius) {
+      this.x = x;
+      this.y = y;
+      this.radius = radius;
+    }
+    draw() {
+      const ctx = myGameArea.context;
+      ctx.beginPath();
+      ctx.arc(this.x, this.y, this.radius, 0, 2 * Math.PI);
+      ctx.fillStyle = "gold";
+      ctx.fill();
+      ctx.strokeStyle = "orange";
+      ctx.stroke();
+    }
+  }
+
+  function isColliding(car, obj) {
+    const carLeft = car.x;
+    const carRight = car.x + car.width;
+    const carTop = car.y;
+    const carBottom = car.y + car.height;
+
+    if (obj instanceof Obstacle) {
+      const objLeft = obj.x;
+      const objRight = obj.x + obj.width;
+      const objTop = obj.y;
+      const objBottom = obj.y + obj.height;
+      return !(carRight < objLeft || carLeft > objRight || carBottom < objTop || carTop > objBottom);
+    }
+
+    if (obj instanceof Coin) {
+      const dx = car.x + car.width / 2 - obj.x;
+      const dy = car.y + car.height / 2 - obj.y;
+      const distance = Math.sqrt(dx * dx + dy * dy);
+      return distance < obj.radius + Math.max(car.width, car.height) / 2;
+    }
+
+    return false;
+  }
+
+  function drawScore() {
+    const ctx = myGameArea.context;
+    ctx.font = "16px Arial";
+    ctx.fillStyle = "black";
+    ctx.fillText("Монетки: " + score, 10, 20);
+  }
+
+  const keys = { up: false, down: false, left: false, right: false, honk: false };
+
+  document.addEventListener('keydown', (event) => {
+    switch (event.key) {
+      case 'ArrowUp': case 'w': case 'W': keys.up = true; break;
+      case 'ArrowDown': case 's': case 'S': keys.down = true; break;
+      case 'ArrowLeft': case 'a': case 'A': keys.left = true; break;
+      case 'ArrowRight': case 'd': case 'D': keys.right = true; break;
+      case ' ': case 'h': case 'H':
+        if (!keys.honk) {
+          keys.honk = true;
+          myCar.honk();
+        }
+        break;
+    }
+  });
+
+  document.addEventListener('keyup', (event) => {
+    switch (event.key) {
+      case 'ArrowUp': case 'w': case 'W': keys.up = false; break;
+      case 'ArrowDown': case 's': case 'S': keys.down = false; break;
+      case 'ArrowLeft': case 'a': case 'A': keys.left = false; break;
+      case 'ArrowRight': case 'd': case 'D': keys.right = false; break;
+      case ' ': case 'h': case 'H': keys.honk = false; break;
+    }
+  });
+
+   function gameLoop() {
+    if (keys.up) myCar.accelerate();
+    if (keys.down) myCar.brake();
+    if (keys.left) myCar.turnLeft();
+    if (keys.right) myCar.turnRight();
+
+    myGameArea.update();
+    requestAnimationFrame(gameLoop);
+  }
+
+  function generateObstacles() {
+    obstacles = [
+      new Obstacle(100, 50, 50, 20),
+      new Obstacle(300, 150, 60, 30),
+      new Obstacle(200, 100, 40, 40)
+    ];
+  }
+
+  function generateCoins() {
+    coins = [
+      new Coin(50, 200, 10),
+      new Coin(400, 50, 10),
+      new Coin(250, 220, 10),
+      new Coin(150, 180, 10)
+    ];
+  }
+
+  window.onload = () => {
+    myGameArea.start();
+    myCar = new Car(40, 20, "red", 240, 200);
+    generateObstacles();
+    generateCoins();
+    gameLoop();
+  };
+</script>
+</body>
+</html>
